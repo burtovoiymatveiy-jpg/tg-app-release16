@@ -10,14 +10,12 @@
             --bg: #ffffff; --sec-bg: #f4f4f5; --text: #000000; --hint: #707579;
             --card-border: rgba(0,0,0,0.1); --accent: #3390ec; --accent-red: #ff3b30; --accent-green: #34c759;
             --toggle-off: #dee2e6;
-            --body-bg: #ffffff; /* Чисто белый для светлой */
         }
         [data-theme="dark"] {
             --bg: #1c1c1d; --sec-bg: #2c2c2e; --text: #ffffff; --hint: #8e8e93; 
             --card-border: rgba(255,255,255,0.1); --toggle-off: #3a3a3c;
-            /* Темная тема: Глубокий темный градиент */
-            --gradient-start: #080c14; 
-            --gradient-end: #12121f;   
+            /* Цвета для градиента темной темы */
+            --grad-1: #080c14; --grad-2: #12121f; --grad-3: #1a1a2e;
         }
 
         body {
@@ -25,14 +23,14 @@
             color: var(--text); margin: 0; padding: 16px;
             display: flex; flex-direction: column; gap: 12px; transition: 0.3s;
             min-height: 100vh;
-            background: var(--body-bg);
+            background-color: #ffffff; /* Чистый белый для светлой темы */
         }
 
-        /* Анимация только для темной темы */
+        /* Красивый переливающийся градиент ТОЛЬКО для темной темы */
         [data-theme="dark"] body {
-            background: linear-gradient(-45deg, var(--gradient-start), var(--gradient-end));
+            background: linear-gradient(-45deg, var(--grad-1), var(--grad-2), var(--grad-3), var(--grad-1));
             background-size: 400% 400%;
-            animation: gradient-animation 12s ease infinite;
+            animation: gradient-animation 10s ease infinite;
         }
 
         @keyframes gradient-animation {
@@ -51,7 +49,7 @@
             display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;
         }
 
-        .card { background: var(--sec-bg); border-radius: 16px; padding: 14px; border: 1px solid var(--card-border); }
+        .card { background: var(--sec-bg); border-radius: 16px; padding: 14px; border: 1px solid var(--card-border); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .error-border { border-color: var(--accent-red) !important; animation: shake 0.3s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
@@ -61,6 +59,7 @@
             color: var(--text); font-size: 16px; padding: 10px; width: 100%; box-sizing: border-box; outline: none;
         }
 
+        /* Идеально выровненный зеленый Toggle */
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; margin: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -132,8 +131,8 @@
 </div>
 
 <div class="card" style="padding: 12px 14px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; min-height: 24px;">
-        <span style="font-size: 14px; font-weight: 700; line-height: 1;">🚨 Срочный заказ</span>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 14px; font-weight: 700;">🚨 Срочный заказ</span>
         <label class="switch" style="display: flex; align-items: center;">
             <input type="checkbox" id="urgent" onchange="update()">
             <span class="slider"></span>
@@ -151,14 +150,14 @@
 </div>
 
 <div class="stats-box">
-    <div style="font-size:11px; color:var(--hint); margin-bottom: 4px;">Все отзывы о проделанной работе здесь:</div>
+    <div style="font-size:11px; color:var(--hint); margin-bottom: 4px;">Все отзывы здесь:</div>
     <div style="font-size:13px; color:var(--accent); font-weight: 700; cursor:pointer;" onclick="tg.openTelegramLink('https://t.me/OTZblBblawarem')">t.me/OTZblBblawarem</div>
 </div>
 
 <div class="disclaimer">
     💳 <b>Предоплата 100%</b><br>
-    ⚠️ Ответственность за правки технического задания после начала работы не несу.<br>
-    ✅ Работа предназначена для мест <b>без проверки на антиплагиат</b>.
+    ⚠️ Ответственность за правки ТЗ после начала работы не несу.<br>
+    ✅ Места <b>без проверки на антиплагиат</b>.
 </div>
 
 <script>
@@ -240,7 +239,7 @@
     }
 
     function clearAll() {
-        if(confirm("Очистить?")) {
+        if(confirm("Очистить все поля?")) {
             document.querySelectorAll('input, textarea').forEach(el => el.value = '');
             document.getElementById('urgent').checked = false;
             update();
