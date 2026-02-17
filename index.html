@@ -2,168 +2,234 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Заказ работы</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #222222);
-            --hint-color: var(--tg-theme-hint-color, #999999);
-            --link-color: var(--tg-theme-link-color, #2481cc);
-            --button-color: var(--tg-theme-button-color, #2481cc);
-            --button-text: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #f0f2f5);
+            --bg: var(--tg-theme-bg-color, #ffffff);
+            --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            --text: var(--tg-theme-text-color, #000000);
+            --hint: var(--tg-theme-hint-color, #707579);
+            --link: var(--tg-theme-link-color, #3390ec);
+            --btn: var(--tg-theme-button-color, #3390ec);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+            --accent-red: #ff3b30;
+            --accent-green: #34c759;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 16px;
-            animation: fadeIn 0.5s ease-in;
+            -webkit-user-select: none;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .header { text-align: center; margin-top: 8px; }
+        .header h1 { font-size: 20px; margin: 0; font-weight: 600; }
+        .header p { font-size: 14px; color: var(--hint); margin: 4px 0 0; }
 
-        .header { text-align: center; padding: 10px 0; }
-        .header h2 { margin: 0; font-size: 22px; background: linear-gradient(45deg, var(--link-color), #8e44ad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        .card {
-            background: var(--secondary-bg);
-            border-radius: 20px;
-            padding: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* Urgent Switch */
-        .urgent-container {
+        /* Urgent Toggle */
+        .urgent-card {
+            background: var(--sec-bg);
+            padding: 14px 16px;
+            border-radius: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(231, 76, 60, 0.1);
-            border: 1px solid rgba(231, 76, 60, 0.3);
-            border-radius: 15px;
-            padding: 12px 16px;
-            transition: 0.3s;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
         }
-        .urgent-active { background: rgba(231, 76, 60, 0.2); border-color: #e74c3c; box-shadow: 0 0 10px rgba(231,76,60,0.2); }
+        .urgent-card.active {
+            border-color: var(--accent-red);
+            background: rgba(255, 59, 48, 0.08);
+        }
 
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #e74c3c; }
-        input:checked + .slider:before { transform: translateX(20px); }
-
+        /* Form Styling */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         select {
-            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--hint-color);
-            background: var(--bg-color); color: var(--text-color); font-size: 16px; appearance: none;
+            appearance: none;
+            background: var(--sec-bg);
+            border: none;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 16px;
+            padding: 12px;
+            width: 100%;
+            outline: none;
         }
 
-        .btn {
-            padding: 16px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700;
-            cursor: pointer; width: 100%; transition: transform 0.1s, opacity 0.2s;
+        /* Receipt Card */
+        .receipt {
+            background: var(--sec-bg);
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+            border: 1px dashed var(--hint);
         }
-        .btn:active { transform: scale(0.97); }
-        .btn-primary { background: var(--button-color); color: var(--button-text); }
-        .btn-secondary { background: #31b545; color: #fff; }
-        .btn-outline { background: transparent; color: var(--link-color); border: 1px solid var(--link-color); padding: 10px; font-size: 14px; }
+        .receipt::before, .receipt::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--bg);
+            border-radius: 50%;
+            top: 50%;
+            margin-top: -10px;
+        }
+        .receipt::before { left: -11px; }
+        .receipt::after { right: -11px; }
 
-        .status-msg { text-align: center; font-size: 12px; color: #31b545; display: none; margin-top: -10px; }
+        .receipt-content {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        /* Buttons */
+        .main-btn {
+            background: var(--btn);
+            color: var(--btn-text);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .main-btn:active { opacity: 0.8; }
         
-        #preview-text { font-size: 13px; color: var(--hint-color); border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; margin-top: 10px; }
+        .row { display: flex; gap: 10px; }
+        .secondary-btn {
+            flex: 1;
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .outline-btn {
+            background: transparent;
+            border: 1px solid var(--link);
+            color: var(--link);
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        /* Switch UI */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .3s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+            background-color: white; transition: .3s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-red); }
+        input:checked + .slider:before { transform: translateX(20px); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>✍️ Оформить заказ</h2>
+        <h1>Оформление заказа</h1>
+        <p>Заполните форму и отправьте @awarem</p>
     </div>
 
-    <div class="urgent-container" id="urgent-box">
-        <span style="font-weight: bold;">🚨 Срочный заказ</span>
+    <div class="urgent-card" id="urgent-box">
+        <span style="font-weight: 600;">🚨 Срочный заказ</span>
         <label class="switch">
-            <input type="checkbox" id="urgent-toggle" onchange="updateStructure()">
+            <input type="checkbox" id="urgent-toggle" onchange="update()">
             <span class="slider"></span>
         </label>
     </div>
 
-    <div class="card">
-        <label style="font-size: 12px; color: var(--hint-color); display: block; margin-bottom: 5px;">ВИД РАБОТЫ</label>
-        <select id="work-type" onchange="updateStructure()">
+    <div class="input-group">
+        <select id="work-type" onchange="update()">
             <option value="Реферат">📝 Реферат</option>
             <option value="Презентация">📊 Презентация</option>
             <option value="Доклад">🎤 Доклад</option>
             <option value="Проект">💡 Проект</option>
             <option value="Переписать лекцию">🖋 Переписать лекцию</option>
         </select>
-        
-        <div id="preview-text"></div>
     </div>
 
-    <button class="btn btn-primary" onclick="copyStructure()">Копировать структуру</button>
-    <div id="status" class="status-msg">Текст скопирован!</div>
-
-    <div style="display: flex; gap: 10px;">
-        <button class="btn btn-secondary" style="flex: 2;" onclick="contactOwner('attach')">📎 Файлы</button>
-        <button class="btn btn-secondary" style="flex: 3;" onclick="contactOwner('chat')">💬 Написать ЛС</button>
+    <div class="receipt">
+        <div id="preview" class="receipt-content"></div>
     </div>
 
-    <button class="btn btn-outline" onclick="tg.openTelegramLink('https://t.me/OTZblBblawarem')">⭐️ Читать отзывы</button>
+    <button class="main-btn" onclick="copy()">Скопировать структуру</button>
+
+    <div class="row">
+        <button class="secondary-btn" onclick="nav('attach')">📎 Файлы</button>
+        <button class="secondary-btn" onclick="nav('chat')">💬 Написать</button>
+    </div>
+
+    <button class="outline-btn" onclick="tg.openTelegramLink('https://t.me/OTZblBblawarem')">⭐️ Читать отзывы</button>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
         tg.expand();
+        tg.ready();
 
-        function updateStructure() {
+        function update() {
             const type = document.getElementById('work-type').value;
             const isUrgent = document.getElementById('urgent-toggle').checked;
-            const urgentBox = document.getElementById('urgent-box');
+            const box = document.getElementById('urgent-box');
             
+            box.className = isUrgent ? 'urgent-card active' : 'urgent-card';
+
             let unit = "страниц";
             if (type.includes("Презентация")) unit = "слайдов";
             if (type.includes("Переписать")) unit = "листов/фото";
 
-            if (isUrgent) {
-                urgentBox.classList.add('urgent-active');
-            } else {
-                urgentBox.classList.remove('urgent-active');
-            }
+            const text = `${isUrgent ? '🔥 СРОЧНО 🔥\n' : ''}
+1. Тип: ${type}
+2. Кол-во ${unit}: 
+3. Дедлайн: 
+4. Бюджет: 
+5. ТЗ/Файлы: 
+6. ФИО: `;
 
-            const structure = `${isUrgent ? '🚨 СРОЧНЫЙ ЗАКАЗ 🚨\n' : ''}
-1. Вид: ${type}
-2. Количество ${unit}: 
-3. Срок: 
-4. Оплата: 
-5. План/ТЗ: 
-6. ФИО клиента и препода: `;
-
-            document.getElementById('preview-text').innerText = structure;
+            document.getElementById('preview').innerText = text;
         }
 
-        function copyStructure() {
-            const text = document.getElementById('preview-text').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                document.getElementById('status').style.display = 'block';
-                tg.HapticFeedback.notificationOccurred('success');
-                setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
-            });
+        function copy() {
+            const text = document.getElementById('preview').innerText;
+            navigator.clipboard.writeText(text);
+            tg.HapticFeedback.notificationOccurred('success');
+            tg.showAlert("Структура скопирована! Вставьте её в чат.");
         }
 
-        function contactOwner(type) {
+        function nav(mode) {
             tg.HapticFeedback.impactOccurred('medium');
             tg.openTelegramLink("https://t.me/awarem");
         }
 
-        // Инициализация
-        updateStructure();
+        update();
     </script>
 </body>
 </html>
+
